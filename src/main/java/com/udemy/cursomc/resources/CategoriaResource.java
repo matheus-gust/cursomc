@@ -2,8 +2,10 @@
 
 import java.net.URI;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -12,10 +14,12 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import com.udemy.cursomc.domain.Categoria;
+import com.udemy.cursomc.dto.CategoriaDTO;
 import com.udemy.cursomc.services.CategoriaService;
 
 @RestController
@@ -26,9 +30,10 @@ public class CategoriaResource {
 	private CategoriaService categoriaService;
 	
 	@GetMapping
-	public ResponseEntity<?> listar() {
+	public ResponseEntity<List<CategoriaDTO>> listar() {
 		List<Categoria> categorias = categoriaService.listar();
-		return ResponseEntity.ok().body(categorias);
+		List<CategoriaDTO> categoriaDTO = categorias.stream().map(obj -> new CategoriaDTO(obj)).collect(Collectors.toList());
+		return ResponseEntity.ok().body(categoriaDTO);
 	}
 	
 	@GetMapping
@@ -56,6 +61,17 @@ public class CategoriaResource {
 	public ResponseEntity<Void> delete(@PathVariable Integer id) {
 		categoriaService.delete(id);
 		return ResponseEntity.noContent().build();
+	}
+	
+	@GetMapping("/page")
+	public ResponseEntity<Page<CategoriaDTO>> findPage(
+			@RequestParam(value="page", defaultValue="0")Integer page, 
+			@RequestParam(value="linesPerPage", defaultValue="24")Integer linesPerPage, 
+			@RequestParam(value="orderBy", defaultValue="nome")String orderBy, 
+			@RequestParam(value="direction", defaultValue="ASC")String direction) {
+		Page<Categoria> categorias = categoriaService.findPage(page, linesPerPage, orderBy, direction);
+		Page<CategoriaDTO> categoriaDTO = categorias.map(obj -> new CategoriaDTO(obj));
+		return ResponseEntity.ok().body(categoriaDTO);
 	}
 	
 }
