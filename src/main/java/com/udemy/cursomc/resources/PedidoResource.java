@@ -1,8 +1,6 @@
  package com.udemy.cursomc.resources;
 
 import java.net.URI;
-import java.util.List;
-
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,9 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import com.udemy.cursomc.domain.Categoria;
 import com.udemy.cursomc.domain.Pedido;
-import com.udemy.cursomc.dto.CategoriaDTO;
 import com.udemy.cursomc.services.PedidoService;
 
 @RestController
