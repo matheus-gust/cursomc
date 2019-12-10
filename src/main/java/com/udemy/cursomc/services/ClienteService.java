@@ -1,10 +1,12 @@
 package com.udemy.cursomc.services;
 
+import java.awt.image.BufferedImage;
 import java.net.URI;
 import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -41,6 +43,12 @@ public class ClienteService {
 	
 	@Autowired
 	private S3Service s3service;
+	
+	@Autowired
+	private ImageService imageService;
+	
+	@Value("${img.prefix.client.profile}")
+	private String prefix;
 	
 	public List<Cliente> listar() {
 		 return clienteRepository.findAll();
@@ -110,6 +118,13 @@ public class ClienteService {
 	}
 	
 	public URI uploadProfilePicture(MultipartFile multipartFile) {
-		return s3service.uploadFile(multipartFile);
+		UserSS user = UserService.authenticated();
+		if(user == null) {
+			throw new AuthorizationException("Acesso negado");
+		}
+		
+		BufferedImage jpgImage = imageService.getJpgImageFromFile(multipartFile);
+		String fileName = prefix + user.getId() + ".jpg";
+		return s3service.uploadFile(imageService.getInputStream(jpgImage, "jpg"), fileName, "image");
 	}
 }
